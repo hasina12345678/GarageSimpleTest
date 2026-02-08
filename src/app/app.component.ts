@@ -1,103 +1,66 @@
-// import { Component, OnInit, inject } from '@angular/core';
-// import { IonicModule, Platform } from '@ionic/angular';
-// import { Capacitor } from '@capacitor/core';
-
-// @Component({
-//   selector: 'app-root',
-//   templateUrl: 'app.component.html',
-//   standalone: true,
-//   imports: [IonicModule]
-// })
-// export class AppComponent implements OnInit {
-//   private platform = inject(Platform);
-
-//   async ngOnInit() {
-//     // Gestion globale des erreurs
-//     if (Capacitor.getPlatform() === 'android') {
-//       window.addEventListener('error', (e) => {
-//         console.error('APP ERROR:', e.error);
-//         this.showErrorToast(e.error?.message || 'Une erreur est survenue');
-//       });
-//     }
-
-//     try {
-//       // Attendre que Capacitor soit prêt
-//       const platformReady = Promise.race([
-//         this.platform.ready(),
-//         new Promise((_, reject) => setTimeout(() => reject(new Error('Platform timeout')), 5000))
-//       ]);
-
-//       await platformReady;
-	  
-//       console.log('✅ Application initialisée, attente de connexion...');
-//     } catch (error) {
-//       console.error('❌ Erreur critique initialisation:', error);
-//     }
-//   }
-
-//   private showErrorToast(message: string) {
-//     console.error('Toast error:', message);
-//   }
-// }
-
 import { Component, OnInit } from '@angular/core';
+import { Platform } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { IonicModule, Platform } from '@ionic/angular';
+
+// Firebase
+import { initializeApp } from '@angular/fire/app';
+import { getAuth } from '@angular/fire/auth';
+import { getFirestore } from '@angular/fire/firestore';
+import { environment } from '../environments/environment';
+
+// Ionicons
 import { addIcons } from 'ionicons';
-import { 
-  // Ajoutez TOUTES les icônes que vous utilisez dans l'app
-  logOutOutline,
-  carOutline, 
-  alertCircleOutline, 
-  checkmarkCircleOutline,
-  timeOutline,
-  calendarOutline,
-  warningOutline,
-  informationCircleOutline,
-  // Ajoutez d'autres icônes que vous utilisez
-  homeOutline,
-  settingsOutline,
-  personOutline,
-  // ... etc.
-} from 'ionicons/icons';
+import { logOutOutline, carOutline, alertCircleOutline, checkmarkCircleOutline, timeOutline, calendarOutline, warningOutline, informationCircleOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, IonicModule],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'votre-app';
+
+  auth: any;
+  firestore: any;
 
   constructor(private platform: Platform) {}
 
   async ngOnInit() {
-    // Attendre que la plateforme soit prête
-    await this.platform.ready();
-    
-    // Charger toutes les icônes après que la plateforme est prête
-    this.loadIcons();
+    try {
+      // 🔹 ATTENDRE QUE CAPACITOR SOIT PRÊT
+      await this.platform.ready();
+      console.log('✅ Platform ready');
+
+      // 🔹 INITIALISATION FIREBASE APRÈS PLATFORM READY
+      const app = initializeApp(environment.firebaseConfig);
+      this.auth = getAuth(app);
+      this.firestore = getFirestore(app);
+      console.log('✅ Firebase initialisé');
+
+      // 🔹 CHARGEMENT DES ICÔNES
+      this.loadIcons();
+      console.log('✅ Icônes chargées');
+    } catch (error) {
+      console.error('❌ Erreur app initialization:', error);
+    }
   }
 
   private loadIcons() {
     try {
       addIcons({
         logOutOutline,
-        carOutline, 
-        alertCircleOutline, 
+        carOutline,
+        alertCircleOutline,
         checkmarkCircleOutline,
         timeOutline,
         calendarOutline,
         warningOutline,
-        informationCircleOutline,
-        // Ajoutez toutes les autres icônes que vous utilisez
+        informationCircleOutline
       });
-      console.log('✅ Icônes chargées avec succès');
-    } catch (error) {
-      console.error('❌ Erreur chargement icônes:', error);
+    } catch (err) {
+      console.error('❌ Erreur chargement icônes:', err);
     }
   }
 }
