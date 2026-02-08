@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "553426867703",
+    "project_id": "garrageapp-05",
+    "storage_bucket": "garrageapp-05.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:553426867703:android:6e523ae4aa564197670af2",
+        "android_client_info": {
+          "package_name": "com.garrage.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNNUnb8iAxIs50YxXSkfk5iQP6kdck_J8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

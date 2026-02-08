@@ -1,15 +1,11 @@
 import { Injectable, inject, NgZone } from '@angular/core'; // AJOUTER NgZone
 import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
-import { OneSignalService } from './onesignal.service';
-import { PanneMonitorService } from './panne-monitor.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private auth = inject(Auth);
-  private oneSignalService = inject(OneSignalService);
-  private panneMonitor = inject(PanneMonitorService);
   private ngZone = inject(NgZone); // AJOUTER NgZone
 
   async login(email: string, password: string): Promise<boolean> {
@@ -17,10 +13,10 @@ export class AuthService {
       const result = await signInWithEmailAndPassword(this.auth, email, password);
       if (result.user) {
         // EXÉCUTER DANS NgZone POUR ÉVITER L'ERREUR
-        this.ngZone.run(async () => {
-          await this.oneSignalService.initAfterLogin(result.user.uid);
-          this.panneMonitor.startMonitoring();
-        });
+        // this.ngZone.run(async () => {
+        //   await this.oneSignalService.initAfterLogin(result.user.uid);
+        //   this.panneMonitor.startMonitoring();
+        // });
         
         return true;
       }
@@ -33,9 +29,9 @@ export class AuthService {
 
   async logout(): Promise<void> {
     try {
-      this.ngZone.run(() => { // AJOUTER NgZone ICI AUSSI
-        this.panneMonitor.stopMonitoring();
-      });
+    //   this.ngZone.run(() => { // AJOUTER NgZone ICI AUSSI
+    //     this.panneMonitor.stopMonitoring();
+    //   });
       
       await signOut(this.auth);
       console.log('✅ Déconnexion réussie!');
