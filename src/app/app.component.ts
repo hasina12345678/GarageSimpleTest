@@ -11,12 +11,29 @@ import { environment } from '../environments/environment';
 
 // Ionicons
 import { addIcons } from 'ionicons';
-import { logOutOutline, carOutline, alertCircleOutline, checkmarkCircleOutline, timeOutline, calendarOutline, warningOutline, informationCircleOutline } from 'ionicons/icons';
+import {
+  logOutOutline,
+  carOutline,
+  alertCircleOutline,
+  checkmarkCircleOutline,
+  timeOutline,
+  calendarOutline,
+  warningOutline,
+  informationCircleOutline
+} from 'ionicons/icons';
+import { IonRouterOutlet, IonApp } from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [
+    CommonModule,
+    RouterOutlet
+    // ❌ plus besoin de IonApp ni IonRouterOutlet
+    ,
+    IonRouterOutlet,
+    IonApp
+],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -29,17 +46,14 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      // 🔹 ATTENDRE QUE CAPACITOR SOIT PRÊT
       await this.platform.ready();
       console.log('✅ Platform ready');
 
-      // 🔹 INITIALISATION FIREBASE APRÈS PLATFORM READY
       const app = initializeApp(environment.firebaseConfig);
       this.auth = getAuth(app);
       this.firestore = getFirestore(app);
       console.log('✅ Firebase initialisé');
 
-      // 🔹 CHARGEMENT DES ICÔNES
       this.loadIcons();
       console.log('✅ Icônes chargées');
     } catch (error) {
