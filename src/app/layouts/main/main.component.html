@@ -1,0 +1,45 @@
+<ion-app>
+  <ion-header>
+  <ion-toolbar class="custom-toolbar">
+    <div class="toolbar-content">
+      <!-- Logo à gauche -->
+      <div class="logo-container">
+        <ion-title class="logo-title">MyGarage</ion-title>
+      </div>
+      
+      <!-- Bouton déconnexion à droite -->
+      <ion-buttons slot="end">
+        <ion-button class="logout-btn" (click)="logout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </div>
+  </ion-toolbar>
+
+    <!-- Navigation Bar -->
+    <ion-toolbar>
+      <ion-segment [value]="activeSegment" scrollable="true" (ionChange)="onSegmentChange($event)">
+        <ion-segment-button value="accueil">
+          <ion-label>Accueil</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="probleme">
+          <ion-label>Problème</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="voiture">
+          <ion-label>Voiture</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="paiement">
+          <ion-label>Paiement</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="notification">
+          <ion-label>Notifi</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <!-- Le contenu change ici -->
+    <router-outlet></router-outlet>
+  </ion-content>
+</ion-app>

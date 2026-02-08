@@ -1,0 +1,132 @@
+<ion-content>
+  <div class="page-container">
+    
+    <!-- Header avec bienvenue -->
+    <div class="welcome-header">
+      <h1 class="page-title">Bienvenue</h1>
+      <p class="subtitle">Vue d'ensemble de votre garage</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Chargement...</p>
+    </div>
+
+    <!-- Contenu principal -->
+    <div *ngIf="!isLoading" class="main-content">
+
+      <!-- Liste des pannes ACTIVES (statuts 1 et 2 seulement) -->
+      <div class="pannes-section">
+        <div class="section-header">
+          <h2>Pannes en cours</h2>
+        </div>
+
+        <!-- Liste des pannes filtrées -->
+        <div *ngIf="hasFilteredPannes(); else noActivePannes">
+          <ion-list class="pannes-list">
+            <ion-card *ngFor="let panne of pannesFiltrees" class="panne-card">
+              <ion-card-content>
+                <!-- En-tête de la panne -->
+                <div class="panne-header">
+                  <div class="panne-info">
+                    <h3>
+                      <ion-icon 
+                        [name]="getStatutIcon(panne.statut?.statutInfo?.id, panne.statut?.statutInfo?.statut)">
+                      </ion-icon>
+                      {{panne.voiture?.marque || 'Voiture'}} {{panne.voiture?.modele || ''}}
+                    </h3>
+                    <p class="matricule">{{panne.voiture?.matricule || ''}}</p>
+                  </div>
+                  <ion-badge 
+                    [color]="getStatutColor(panne.statut?.statutInfo?.id, panne.statut?.statutInfo?.statut)">
+                    {{panne.statut?.statutInfo?.statut || 'Statut inconnu'}}
+                  </ion-badge>
+                </div>
+
+                <!-- Détails de la panne -->
+                <div class="panne-details">
+                  <p class="date">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    {{formatDate(panne.dateHeure)}}
+                  </p>
+                  
+                  <!-- Types de problèmes -->
+                  <div class="problemes-list" *ngIf="panne.details?.length > 0">
+                    <ion-chip *ngFor="let detail of panne.details" color="medium" size="small">
+                      <ion-label>{{detail.type?.nom || 'Problème'}}</ion-label>
+                      <span *ngIf="detail.type?.prix" class="chip-price">
+                        {{detail.type?.prix}} Ar
+                      </span>
+                    </ion-chip>
+                  </div>
+                  
+                  <!-- Résumé -->
+                  <div class="panne-summary">
+                    <div class="summary-item">
+                      <span class="label">Coût estimé:</span>
+                      <span class="value">{{panne.totalPrix}} Ar</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="label">Durée estimée:</span>
+                      <span class="value">{{panne.totalDuree}}h</span>
+                    </div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
+        </div>
+
+        <!-- Message si pas de pannes actives -->
+        <ng-template #noActivePannes>
+          <ion-card class="empty-state">
+            <ion-card-content class="ion-text-center">
+              <ion-icon name="checkmark-circle-outline" size="large" color="success"></ion-icon>
+              <h3>Aucune panne active</h3>
+              <p>Toutes vos pannes sont réglées et payées</p>
+              <ion-button fill="outline" (click)="navigateToProbleme()">
+                Signaler un nouveau problème
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ng-template>
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="quick-actions">
+        <ion-card class="action-card" (click)="navigateToProbleme()">
+          <ion-card-content>
+            <ion-icon name="alert-circle-outline" class="action-icon" color="primary"></ion-icon>
+            <h3>Signaler un problème</h3>
+            <p>Nouvelle panne</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="action-card" (click)="navigateToVoiture()">
+          <ion-card-content>
+            <ion-icon name="car-outline" class="action-icon" color="primary"></ion-icon>
+            <h3>Gérer mes voitures</h3>
+            <p>{{voitures.length}} voiture(s)</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Avertissement si pas de voiture -->
+      <div *ngIf="voitures.length === 0" class="warning-card">
+        <ion-card>
+          <ion-card-content class="warning-content">
+            <ion-icon name="information-circle-outline" color="warning" size="large"></ion-icon>
+            <div>
+              <h3>Aucune voiture enregistrée</h3>
+              <p>Ajoutez d'abord une voiture pour pouvoir signaler des problèmes</p>
+              <ion-button fill="solid" (click)="navigateToVoiture()">
+                Ajouter une voiture
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+</ion-content>

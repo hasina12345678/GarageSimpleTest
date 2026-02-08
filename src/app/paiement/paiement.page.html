@@ -1,0 +1,194 @@
+<ion-content class="ion-padding">
+	<div class="page-container">
+		<!-- Header -->
+		<div class="welcome-header">
+			<h1 class="page-title">Paiement des Pannes</h1>
+			<p class="subtitle">Sélectionnez une panne et effectuez le paiement</p>
+		</div>
+
+		<!-- Loading State -->
+		<div *ngIf="isLoading" class="loading-container">
+			<ion-spinner name="crescent"></ion-spinner>
+			<p>Chargement des pannes...</p>
+		</div>
+
+		<!-- Error State -->
+		<div *ngIf="errorMessage" class="error-message">
+			<ion-icon name="warning-outline"></ion-icon>
+			<p>{{errorMessage}}</p>
+		</div>
+
+		<!-- Main Content -->
+		<div *ngIf="!isLoading && !errorMessage">
+
+			<!-- FORMULAIRE PRINCIPAL -->
+			<form [formGroup]="paiementForm" (ngSubmit)="soumettrePaiement()">
+
+				<!-- Section 1: Sélection de la panne -->
+				<ion-card class="form-section">
+					<ion-card-header>
+						<ion-card-title>1. Sélectionnez une panne</ion-card-title>
+						<ion-card-subtitle>Pannes réparées en attente de paiement</ion-card-subtitle>
+					</ion-card-header>
+
+					<ion-card-content>
+						<ion-item>
+							<ion-label position="floating">Panne à payer*</ion-label>
+							<ion-select formControlName="idPanne" interface="action-sheet"
+								(ionChange)="onPanneSelectionChange($event)">
+								<ion-select-option *ngFor="let panne of pannesReparees" [value]="panne.id">
+									{{panne.voiture?.marque}} {{panne.voiture?.modele}} - {{panne.voiture?.matricule}}
+									<span class="select-info">(Total: {{panne.totalPrix}} Ar)</span>
+								</ion-select-option>
+							</ion-select>
+						</ion-item>
+
+						<!-- Détails de la panne sélectionnée -->
+						<div *ngIf="panneSelectionnee" class="panne-details-card">
+							<h3>Détails de la panne</h3>
+
+							<!-- Info voiture -->
+							<div class="info-row">
+								<ion-icon name="car-outline"></ion-icon>
+								<div class="info-content">
+									<strong>Voiture:</strong>
+									<p>{{panneSelectionnee.voiture?.marque}} {{panneSelectionnee.voiture?.modele}}</p>
+									<p>Matricule: {{panneSelectionnee.voiture?.matricule}}</p>
+								</div>
+							</div>
+
+							<!-- Date de la panne -->
+							<div class="info-row">
+								<ion-icon name="calendar-outline"></ion-icon>
+								<div class="info-content">
+									<strong>Date de la panne:</strong>
+									<p>{{formatDate(panneSelectionnee.dateHeure)}}</p>
+								</div>
+							</div>
+
+							<!-- Liste des problèmes -->
+							<div class="problemes-section">
+								<strong>Problèmes réparés:</strong>
+								<div class="problemes-list">
+									<ion-chip *ngFor="let detail of panneSelectionnee.details" color="medium"
+										size="small">
+										<ion-label>{{detail.type?.nom}}</ion-label>
+										<span class="chip-price">{{detail.type?.prix}} Ar</span>
+									</ion-chip>
+								</div>
+							</div>
+
+							<!-- Résumé financier -->
+							<div class="financial-summary">
+								<div class="summary-item">
+									<span class="label">Total à payer:</span>
+									<span class="value total">{{panneSelectionnee.totalPrix}} Ar</span>
+								</div>
+
+								<div *ngIf="montantDejaPaye > 0" class="summary-item">
+									<span class="label">Déjà payé:</span>
+									<span class="value paid">{{montantDejaPaye}} Ar</span>
+								</div>
+
+								<div *ngIf="montantDejaPaye > 0" class="summary-item">
+									<span class="label">Reste à payer:</span>
+									<span class="value remaining">{{panneSelectionnee.totalPrix - montantDejaPaye}}
+										Ar</span>
+								</div>
+							</div>
+						</div>
+					</ion-card-content>
+				</ion-card>
+
+				<!-- Section 2: Formulaire de paiement -->
+				<ion-card class="form-section" *ngIf="panneSelectionnee">
+					<ion-card-header>
+						<ion-card-title>2. Effectuer le paiement</ion-card-title>
+						<ion-card-subtitle>Entrez le montant du paiement</ion-card-subtitle>
+					</ion-card-header>
+
+					<ion-card-content>
+						<!-- Montant à payer -->
+						<ion-item>
+							<ion-label position="floating">Montant à payer (Ar)*</ion-label>
+							<ion-input type="number" formControlName="montant" placeholder="Entrez le montant" [min]="1"
+								[max]="panneSelectionnee.totalPrix - montantDejaPaye"></ion-input>
+						</ion-item>
+
+						<!-- Aide montant -->
+						<div class="amount-help">
+							<p>Montant maximum: {{panneSelectionnee.totalPrix - montantDejaPaye}} Ar</p>
+							<p *ngIf="montantDejaPaye > 0">Déjà payé: {{montantDejaPaye}} Ar</p>
+						</div>
+
+						<!-- Options de montant rapide -->
+						<div class="quick-amounts" *ngIf="panneSelectionnee">
+							<p>Options rapides:</p>
+							<div class="quick-buttons">
+								<!-- IMPORTANT: type="button" pour éviter la soumission -->
+								<ion-button *ngFor="let option of getQuickAmountOptions()" size="small" fill="outline"
+									type="button" (click)="setMontant(option)">
+									{{option}} Ar
+								</ion-button>
+								<ion-button size="small" fill="outline" color="success" type="button"
+									(click)="setMontant(panneSelectionnee.totalPrix - montantDejaPaye)">
+									Payer tout ({{panneSelectionnee.totalPrix - montantDejaPaye}} Ar)
+								</ion-button>
+							</div>
+						</div>
+
+						<!-- Résumé du paiement -->
+						<div class="payment-summary">
+							<h4>Résumé du paiement</h4>
+
+							<div class="summary-row">
+								<span>Total de la panne:</span>
+								<span>{{panneSelectionnee.totalPrix}} Ar</span>
+							</div>
+
+							<div class="summary-row" *ngIf="montantDejaPaye > 0">
+								<span>Déjà payé:</span>
+								<span class="paid">-{{montantDejaPaye}} Ar</span>
+							</div>
+
+							<div class="summary-row" *ngIf="paiementForm.get('montant')?.value">
+								<span>Paiement actuel:</span>
+								<span class="current-payment">{{paiementForm.get('montant')?.value}} Ar</span>
+							</div>
+
+							<div class="summary-row total-row">
+								<span>Reste après paiement:</span>
+								<span class="remaining">
+									{{panneSelectionnee.totalPrix - montantDejaPaye -
+									(paiementForm.get('montant')?.value || 0)}} Ar
+								</span>
+							</div>
+						</div>
+
+						<!-- Bouton de soumission -->
+						<ion-button expand="block" type="submit" class="submit-button"
+							[disabled]="!paiementForm.valid || isSubmitting"
+							[color]="paiementForm.valid ? 'primary' : 'medium'">
+							<ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+							<span *ngIf="!isSubmitting">
+								<ion-icon name="card-outline" slot="start"></ion-icon>
+								Effectuer le paiement
+							</span>
+						</ion-button>
+					</ion-card-content>
+				</ion-card>
+			</form> <!-- FIN DU FORMULAIRE -->
+
+			<!-- Message si aucune panne (EN DEHORS DU FORMULAIRE) -->
+			<div *ngIf="pannesReparees.length === 0" class="empty-state">
+				<ion-card>
+					<ion-card-content class="ion-text-center">
+						<ion-icon name="checkmark-circle-outline" size="large" color="success"></ion-icon>
+						<h3>Aucune panne à payer</h3>
+						<p>Toutes vos pannes réparées sont déjà payées</p>
+					</ion-card-content>
+				</ion-card>
+			</div>
+		</div>
+	</div>
+</ion-content>
