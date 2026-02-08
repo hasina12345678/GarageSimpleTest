@@ -7,3 +7,5 @@ const config: CapacitorConfig = {
 };
 
 export default config;
+
+//mety kosa
