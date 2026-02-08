@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:553426867703:android:6e523ae4aa564197670af2",
+        "mobilesdk_app_id": "1:553426867703:android:ce46cdee625df479670af2",
         "android_client_info": {
-          "package_name": "com.garrage.app"
+          "package_name": "com.garage.app"
         }
       },
       "oauth_client": [],
