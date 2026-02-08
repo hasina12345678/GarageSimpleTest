@@ -1,0 +1,7 @@
+{
+  "name": "GarageSimpleTest",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
