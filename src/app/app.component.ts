@@ -39,27 +39,29 @@ import { IonRouterOutlet, IonApp } from "@ionic/angular/standalone";
 })
 export class AppComponent implements OnInit {
 
-  auth: any;
-  firestore: any;
+	auth: any;
+	firestore: any;
 
-  constructor(private platform: Platform) {}
+  	constructor(private platform: Platform) {}
 
-  async ngOnInit() {
-    try {
-      await this.platform.ready();
-      console.log('✅ Platform ready');
+	async ngOnInit() {
+		await this.platform.ready();
 
-      const app = initializeApp(environment.firebaseConfig);
-      this.auth = getAuth(app);
-      this.firestore = getFirestore(app);
-      console.log('✅ Firebase initialisé');
+		// 🔹 Ne lancer Firebase que sur mobile
+		if (this.platform.is('capacitor')) {
+			try {
+			const app = initializeApp(environment.firebaseConfig);
+			this.auth = getAuth(app);
+			this.firestore = getFirestore(app);
+			console.log('✅ Firebase initialisé sur mobile');
+			} catch (err) {
+			console.error('❌ Erreur Firebase:', err);
+			}
+		} else {
+			console.log('💡 Firebase non initialisé (web)');
+		}
+	}
 
-      this.loadIcons();
-      console.log('✅ Icônes chargées');
-    } catch (error) {
-      console.error('❌ Erreur app initialization:', error);
-    }
-  }
 
   private loadIcons() {
     try {
