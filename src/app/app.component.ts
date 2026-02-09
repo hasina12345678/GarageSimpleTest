@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
 
-// Firebase
+// Firebase (lazy & sécurisé)
 import { initializeApp } from '@angular/fire/app';
 import { getAuth } from '@angular/fire/auth';
 import { getFirestore } from '@angular/fire/firestore';
@@ -21,47 +22,58 @@ import {
   warningOutline,
   informationCircleOutline
 } from 'ionicons/icons';
-import { IonRouterOutlet, IonApp } from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet
-    // ❌ plus besoin de IonApp ni IonRouterOutlet
-    ,
-    IonRouterOutlet,
-    IonApp
-],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
 
-	auth: any;
-	firestore: any;
+  firebaseReady = false;
 
-  	constructor(private platform: Platform) {}
+  constructor(private platform: Platform) {}
 
-	async ngOnInit() {
-		await this.platform.ready();
+  async ngOnInit() {
+    try {
+      console.log('⏳ Attente platform...');
+      await this.platform.ready();
+      console.log('✅ Platform ready');
 
-		// 🔹 Ne lancer Firebase que sur mobile
-		if (this.platform.is('capacitor')) {
-			try {
-			const app = initializeApp(environment.firebaseConfig);
-			this.auth = getAuth(app);
-			this.firestore = getFirestore(app);
-			console.log('✅ Firebase initialisé sur mobile');
-			} catch (err) {
-			console.error('❌ Erreur Firebase:', err);
-			}
-		} else {
-			console.log('💡 Firebase non initialisé (web)');
-		}
-	}
+      this.loadIcons();
 
+      // 🔥 Firebase UNIQUEMENT sur mobile natif
+      if (Capacitor.isNativePlatform()) {
+        await this.safeInitFirebase();
+      } else {
+        console.log('🌐 Mode WEB → Firebase ignoré');
+      }
+
+    } catch (err) {
+      console.error('❌ ERREUR INIT APP (NON BLOQUANTE):', err);
+    }
+  }
+
+  // 🔐 Initialisation Firebase SÉCURISÉE
+  private async safeInitFirebase() {
+    try {
+      console.log('🔥 Initialisation Firebase...');
+      
+      const app = initializeApp(environment.firebaseConfig);
+
+      // ⚠️ NE PAS stocker globalement si erreur
+      getAuth(app);
+      getFirestore(app);
+
+      this.firebaseReady = true;
+      console.log('✅ Firebase prêt');
+    } catch (err) {
+      console.error('🚨 Firebase ERROR (IGNORÉ):', err);
+      console.warn('⚠️ L’app continue SANS Firebase');
+    }
+  }
 
   private loadIcons() {
     try {
@@ -75,8 +87,9 @@ export class AppComponent implements OnInit {
         warningOutline,
         informationCircleOutline
       });
+      console.log('✅ Icônes chargées');
     } catch (err) {
-      console.error('❌ Erreur chargement icônes:', err);
+      console.warn('⚠️ Erreur icônes (ignorée)');
     }
   }
 }
