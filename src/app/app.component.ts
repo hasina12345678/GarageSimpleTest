@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 
-// Firebase (lazy & sécurisé)
+// Firebase (lazy & sécurisé
 import { initializeApp } from '@angular/fire/app';
 import { getAuth } from '@angular/fire/auth';
 import { getFirestore } from '@angular/fire/firestore';
